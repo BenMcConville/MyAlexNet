@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 
 # Create Training/Validation Set loader
 
-def create_training_validation_set(path='./data', valid_size=0.1):
+def create_training_validation_set(path='./data', download=False, valid_size=0.1):
 
     validation_transformer = transforms.Compose([
         transforms.Resize((227, 227)),
@@ -30,14 +30,14 @@ def create_training_validation_set(path='./data', valid_size=0.1):
         root=path,
         train=True,
         transform=training_transformer,
-        download=True
+        download=download
     )
 
     validation_set = datasets.CIFAR10(
         root=path,
         train=True,
         transform=validation_transformer,
-        download=True
+        download=download
     )
 
     num_train = len(training_set)
@@ -57,7 +57,7 @@ def create_training_validation_set(path='./data', valid_size=0.1):
 
 
 # Create Test Set loader
-def create_testing_set(path='./data'):
+def create_testing_set(path='./data', download=False):
 
     testing_transformer = transforms.Compose([
         transforms.Resize((227, 227)),
@@ -72,7 +72,7 @@ def create_testing_set(path='./data'):
         root=path,
         train=False,
         transform=testing_transformer,
-        download=True
+        download=download
     )
 
     test_dataloader = DataLoader(testing_set, batch_size=64, shuffle=True)
