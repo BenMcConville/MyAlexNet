@@ -2,7 +2,7 @@ from torchvision import datasets
 from torchvision import transforms
 from torch.utils.data.sampler import SubsetRandomSampler
 from torch.utils.data import DataLoader
-
+import numpy as np
 # Create Training/Validation Set loader
 
 def create_training_validation_set(path='./data', download=False, valid_size=0.1):
@@ -42,8 +42,7 @@ def create_training_validation_set(path='./data', download=False, valid_size=0.1
 
     num_train = len(training_set)
     indices = list(range(num_train))
-#     split = int(np.floor(valid_size * num_train))
-    split = num_train - 64
+    split = int(np.floor(valid_size * num_train))
 
     train_idx, valid_idx = indices[split:], indices[:split]
     train_sampler = SubsetRandomSampler(train_idx)

@@ -1,12 +1,12 @@
 #!/bin/bash
 #SBATCH --job-name=My_ANet
-#SBATCH --output=/home/%u/slogs/${SLURM_JOB_ID}.out
-#SBATCH --error=/home/%u/slogs/${SLURM_JOB_ID}_Err.out
+#SBATCH --output=/home/%u/slogs/script_out.out
+#SBATCH --error=/home/%u/slogs/script_err.out
 #SBATCH -N 1	  # nodes requested
 #SBATCH -n 1	  # tasks requested
 #SBATCH --gres=gpu:1  # use 1 GPU
 #SBATCH --mem=14000  # memory in Mb
-#SBATCH --partition=ILCC_GPU
+#SBATCH --partition=PGR-Standard
 #SBATCH -t 12:00:00  # time requested in hour:minute:seconds
 #SBATCH --cpus-per-task=4
 
@@ -21,35 +21,43 @@ echo "Job started at ${dt}"
 # Activate Anaconda environment
 # ====================
 source /home/${USER}/miniconda3/bin/activate MyAlexNet
+echo "Activated Conda Env"
 
 # ====================
 # RSYNC data from /home/ to /disk/scratch/
 # ====================
 export SCRATCH_HOME=/disk/scratch/${USER}
 export DATA_HOME=${PWD}/data
-export DATA_SCRATCH=${SCRATCH_HOME}/pgr/data
-mkdir -p ${SCRATCH_HOME}/pgr/data
+export DATA_SCRATCH=${SCRATCH_HOME}/data
+mkdir -p ${SCRATCH_HOME}/data
+echo "Created Dir: ${DATA_SCRATCH}"
 rsync --archive --update --compress --progress ${DATA_HOME}/ ${DATA_SCRATCH}
+
 
 # ====================
 # Run training. Here we use src/gpu.py
 # ====================
 echo "Creating directory to save model weights"
-export OUTPUT_DIR=${SCRATCH_HOME}/pgr/example
+export OUTPUT_DIR=${SCRATCH_HOME}/weights
 mkdir -p ${OUTPUT_DIR}
+echo "Created Dir: ${OUTPUT_DIR}"
 
-# This script does not actually do very much. But it does demonstrate the principles of training
-python3 src/download_dataset.py \
-	--data_path=${DATA_SCRATCH}/pgr/data
+echo "Scratch Home:"
+ls ${SCRATCH_HOME}
+
+echo "\n Weights"
+ls ${OUTPUT_DIR}
 
 # ====================
 # Run prediction. We will save outputs and weights to the same location but this is not necessary
 # ====================
-python3 src/train_script.py \
-	--data_path=${DATA_SCRATCH}/pgr/data \
-	--output_dir=${OUTPUT_DIR} \
-	--compute="gpu"
+echo "Training..."
 
+python3 src/train_script.py \
+	--data_path=${DATA_SCRATCH} \
+	--output_dir=${OUTPUT_DIR} \
+	--compute="cuda"
+echo "Trained"
 # ====================
 # RSYNC data from /disk/scratch/ to /home/. This moves everything we want back onto the distributed file system
 # ====================

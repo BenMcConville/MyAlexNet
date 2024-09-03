@@ -13,7 +13,7 @@ parser = argparse.ArgumentParser()
 
 parser.add_argument("--data_path", type=str, required=True, help="Data location")
 parser.add_argument("--output_dir", type=str, required=True, help="Output directory")
-parser.add_argument("--compute", type=str, required=True, help="(cpu/gpu)")
+parser.add_argument("--compute", type=str, required=True, help="(cpu/cuda)")
 
 
 
@@ -21,10 +21,10 @@ def main(args):
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     if args.compute == 'cpu':
         device = torch.device('cpu')
-    elif args.compute == 'gpu':
-        device = torch.device('gpu')
+    elif args.compute == 'cuda':
+        device = torch.device('cuda')
     else:
-        assert False, "Please select gpu or cpu"
+        assert False, "Please select cpu or cuda"
 
     print("Running Device", device)
 
@@ -70,7 +70,7 @@ def main(args):
         print('Epoch [{}], Step [{}]'.format(epoch+1, total_step))
 
     print("Model Trained")
-    torch.save(model.state_dict(), f"{args.output_dir}")
+    torch.save(model.state_dict(), args.output_dir+"/model")
     print("Model Saved")
 
 if __name__ == '__main__':
